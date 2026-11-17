@@ -38,8 +38,6 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import kotlin.math.sqrt
-
-/** View: desenha o estado e encaminha intenções ao ViewModel. */
 class MainActivity : ComponentActivity(), SensorEventListener {
     private val vm: BadgrViewModel by viewModels()
     private val bg = Color.rgb(24,25,27)

@@ -5,8 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import br.com.badgr.mobile.data.local.entity.EventEntity
-
-/** O Room gera a implementação e verifica estas consultas durante a compilação. */
 @Dao
 interface EventDao {
     @Query("SELECT * FROM events ORDER BY id")

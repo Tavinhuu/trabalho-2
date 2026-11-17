@@ -13,8 +13,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-
-/** Estado da tela e ações ficam fora da Activity. Não guarda referências a Views. */
 class BadgrViewModel(app: Application) : AndroidViewModel(app) {
     private val repository = EventRepository(BadgrDatabase.getInstance(app))
     private val _catalog = MutableLiveData(Catalog())

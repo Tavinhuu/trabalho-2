@@ -29,7 +29,6 @@ object EventSearch {
             normalized("${it.title} ${it.venue} ${it.city}").contains(q) }
     }
 }
-/** Usa a magnitude da aceleração, incluindo gravidade. Limita eventos repetidos. */
 class ShakeDetector(private val thresholdG: Double = 2.5, private val cooldownMs: Long = 1800) {
     private var lastShake: Long? = null
     fun accept(x: Float, y: Float, z: Float, timeMs: Long): Boolean {

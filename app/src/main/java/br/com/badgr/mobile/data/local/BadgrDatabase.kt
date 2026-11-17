@@ -11,7 +11,7 @@ import br.com.badgr.mobile.data.local.entity.EventEntity
 import br.com.badgr.mobile.data.local.entity.FavoriteEntity
 import br.com.badgr.mobile.data.local.entity.TicketEntity
 
-@Database(entities = [EventEntity::class, FavoriteEntity::class, TicketEntity::class], version = 2, exportSchema = true)
+@Database(entities = [EventEntity::class, FavoriteEntity::class, TicketEntity::class], version = 1, exportSchema = true)
 abstract class BadgrDatabase : RoomDatabase() {
     abstract fun eventDao(): EventDao
     abstract fun favoriteDao(): FavoriteDao
@@ -21,8 +21,7 @@ abstract class BadgrDatabase : RoomDatabase() {
         @Volatile private var instance: BadgrDatabase? = null
 
         fun getInstance(context: Context): BadgrDatabase = instance ?: synchronized(this) {
-            instance ?: Room.databaseBuilder(context.applicationContext, BadgrDatabase::class.java, "badgr-demo.db")
-                .addMigrations(DatabaseMigrations.FROM_1_TO_2)
+            instance ?: Room.databaseBuilder(context.applicationContext, BadgrDatabase::class.java, "badgr.db")
                 .build().also { instance = it }
         }
     }

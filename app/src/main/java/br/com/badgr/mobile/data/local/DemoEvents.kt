@@ -1,8 +1,6 @@
 package br.com.badgr.mobile.data.local
 
 import br.com.badgr.mobile.domain.model.Event
-
-/** Agenda fictícia. Coordenadas de referência, sem parceria ou evento confirmado. */
 object DemoEvents {
     val all = listOf(
         Event(1,"UMBRA","21 NOV · SÁB, 22H","Espaço Aurora","São Paulo, SP","Techno",3500,100,-23.5505,-46.6333,"Uma noite de pistas escuras, encontros e música eletrônica independente. Line-up de demonstração: Luma, Nox e Vértice. Classificação 18 anos. Evento fictício para o trabalho acadêmico.",0xFF8655E9.toInt()),

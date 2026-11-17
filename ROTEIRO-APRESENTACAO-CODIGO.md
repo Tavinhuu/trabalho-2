@@ -2,7 +2,7 @@
 
 ## Resposta de persistência para o professor
 
-> “A persistência usa Room sobre SQLite. `BadgrDatabase` abre o arquivo local `badgr-demo.db`. `EventEntity`, `FavoriteEntity` e `TicketEntity` definem as tabelas. As interfaces `EventDao`, `FavoriteDao` e `TicketDao` definem as consultas e gravações. O Repository coordena esses DAOs e as regras, e o ViewModel publica o estado para a Activity.”
+> “A persistência usa Room sobre SQLite. `BadgrDatabase` abre o arquivo local `badgr.db`. `EventEntity`, `FavoriteEntity` e `TicketEntity` definem as tabelas. As interfaces `EventDao`, `FavoriteDao` e `TicketDao` definem as consultas e gravações. O Repository coordena esses DAOs e as regras, e o ViewModel publica o estado para a Activity.”
 
 **Para mostrar rapidamente:** abra `data/local/BadgrDatabase.kt`, depois `data/local/entity/TicketEntity.kt`, `data/local/dao/TicketDao.kt` e `data/repository/EventRepository.kt`.
 
@@ -14,8 +14,7 @@ Os caminhos abaixo são relativos a `app/src/main/java/br/com/badgr/mobile/`.
 
 | Arquivo | O que explicar |
 |---|---|
-| `data/local/BadgrDatabase.kt` | Classe @Database. Declara entidades, expõe os três DAOs e abre badgr-demo.db como singleton com Room.databaseBuilder. |
-| `data/local/DatabaseMigrations.kt` | Migração 1 para 2. Adapta tabelas antigas para o esquema Room e preserva registros. SQL manual existe somente nesta conversão de esquema. |
+| `data/local/BadgrDatabase.kt` | Classe @Database. Declara entidades, expõe os três DAOs e abre badgr.db como singleton com Room.databaseBuilder. |
 | `data/local/DemoEvents.kt` | Quatro eventos fictícios para inserir na primeira carga se events estiver vazia. |
 | `data/local/dao/EventDao.kt` | @Dao: getAll, getById, count e insertAll. Consultas de eventos e inserção da agenda. |
 | `data/local/dao/FavoriteDao.kt` | @Dao: getEventIds, insert, delete e deleteAll. Favoritos persistidos, sem duplicatas. |
@@ -32,7 +31,7 @@ Os caminhos abaixo são relativos a `app/src/main/java/br/com/badgr/mobile/`.
 
 ## Métodos e linhas para localizar no Android Studio
 
-As linhas correspondem a esta versão. Se você editar, procure pelo nome do método.
+As linhas correspondem a esta versão. Se editar, procure pelo nome do método.
 
 | Arquivo | Método ou declaração | Linha |
 |---|---|---:|
@@ -40,11 +39,10 @@ As linhas correspondem a esta versão. Se você editar, procure pelo nome do mé
 | `data/local/BadgrDatabase.kt` | `abstract fun favoriteDao(): FavoriteDao` | 17 |
 | `data/local/BadgrDatabase.kt` | `abstract fun ticketDao(): TicketDao` | 18 |
 | `data/local/BadgrDatabase.kt` | `fun getInstance(context: Context): BadgrDatabase = instance ?: synchronized(this)` | 23 |
-| `data/local/DatabaseMigrations.kt` | `override fun migrate(db: SupportSQLiteDatabase)` | 9 |
-| `data/local/dao/EventDao.kt` | `suspend fun getAll(): List<EventEntity>` | 13 |
-| `data/local/dao/EventDao.kt` | `suspend fun getById(id: Long): EventEntity?` | 16 |
-| `data/local/dao/EventDao.kt` | `suspend fun count(): Int` | 19 |
-| `data/local/dao/EventDao.kt` | `suspend fun insertAll(events: List<EventEntity>)` | 22 |
+| `data/local/dao/EventDao.kt` | `suspend fun getAll(): List<EventEntity>` | 11 |
+| `data/local/dao/EventDao.kt` | `suspend fun getById(id: Long): EventEntity?` | 14 |
+| `data/local/dao/EventDao.kt` | `suspend fun count(): Int` | 17 |
+| `data/local/dao/EventDao.kt` | `suspend fun insertAll(events: List<EventEntity>)` | 20 |
 | `data/local/dao/FavoriteDao.kt` | `suspend fun getEventIds(): List<Long>` | 12 |
 | `data/local/dao/FavoriteDao.kt` | `suspend fun insert(favorite: FavoriteEntity)` | 15 |
 | `data/local/dao/FavoriteDao.kt` | `suspend fun delete(eventId: Long): Int` | 18 |
@@ -57,65 +55,65 @@ As linhas correspondem a esta versão. Se você editar, procure pelo nome do mé
 | `data/mapper/EntityMappers.kt` | `fun EventEntity.toDomain() = Event(id, title, date, venue, city, category, priceCents, capacity, latitude, longitude, description, color)` | 8 |
 | `data/mapper/EntityMappers.kt` | `fun Event.toEntity() = EventEntity(id, title, date, venue, city, category, priceCents, capacity, latitude, longitude, description, color)` | 9 |
 | `data/mapper/EntityMappers.kt` | `fun TicketEntity.toDomain() = Ticket(id, eventId, holder, totalCents, createdAt, checkedIn)` | 10 |
-| `data/repository/EventRepository.kt` | `suspend fun load(): Catalog = database.withTransaction` | 21 |
-| `data/repository/EventRepository.kt` | `suspend fun toggleFavorite(id: Long) = database.withTransaction` | 26 |
-| `data/repository/EventRepository.kt` | `suspend fun reserve(eventId: Long, holder: String): String = database.withTransaction` | 31 |
-| `data/repository/EventRepository.kt` | `suspend fun checkIn(id: String): Boolean = tickets.checkIn(id) == 1` | 41 |
-| `data/repository/EventRepository.kt` | `suspend fun reset() = database.withTransaction` | 43 |
+| `data/repository/EventRepository.kt` | `suspend fun load(): Catalog = database.withTransaction` | 19 |
+| `data/repository/EventRepository.kt` | `suspend fun toggleFavorite(id: Long) = database.withTransaction` | 24 |
+| `data/repository/EventRepository.kt` | `suspend fun reserve(eventId: Long, holder: String): String = database.withTransaction` | 29 |
+| `data/repository/EventRepository.kt` | `suspend fun checkIn(id: String): Boolean = tickets.checkIn(id) == 1` | 39 |
+| `data/repository/EventRepository.kt` | `suspend fun reset() = database.withTransaction` | 41 |
 | `domain/rules/Rules.kt` | `fun fee(priceCents: Long): Long` | 8 |
 | `domain/rules/Rules.kt` | `fun total(priceCents: Long): Long = Math.addExact(priceCents, fee(priceCents))` | 12 |
 | `domain/rules/Rules.kt` | `fun money(cents: Long): String = java.text.NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")).format(cents / 100.0)` | 13 |
 | `domain/rules/Rules.kt` | `fun validate(holder: String, reserved: Int, capacity: Int): String? = when` | 16 |
 | `domain/rules/Rules.kt` | `fun filter(events: List<Event>, query: String, category: String = "Todos"): List<Event>` | 24 |
 | `domain/rules/Rules.kt` | `fun normalized(s: String) = java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD)` | 25 |
-| `domain/rules/Rules.kt` | `fun accept(x: Float, y: Float, z: Float, timeMs: Long): Boolean` | 35 |
-| `ui/MainActivity.kt` | `override fun onCreate(savedInstanceState: Bundle?)` | 63 |
-| `ui/MainActivity.kt` | `override fun handleOnBackPressed()` | 79 |
-| `ui/MainActivity.kt` | `override fun onSaveInstanceState(outState: Bundle)` | 86 |
-| `ui/MainActivity.kt` | `private fun dp(n: Int) = (n * resources.displayMetrics.density).toInt()` | 91 |
-| `ui/MainActivity.kt` | `private fun shape(color: Int, radius: Int = 20) = GradientDrawable().apply` | 92 |
-| `ui/MainActivity.kt` | `private fun gradient(a: Int = pink, b: Int = Color.rgb(144,90,234)) = GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(a,b)).apply` | 93 |
-| `ui/MainActivity.kt` | `private fun col(): LinearLayout = LinearLayout(this).apply` | 94 |
-| `ui/MainActivity.kt` | `private fun row(): LinearLayout = LinearLayout(this).apply` | 95 |
-| `ui/MainActivity.kt` | `private fun text(value: String, size: Int = 16, color: Int = Color.WHITE, bold: Boolean = false): TextView = TextView(this).apply` | 96 |
-| `ui/MainActivity.kt` | `private fun gap(parent: LinearLayout, h: Int = 16)` | 100 |
-| `ui/MainActivity.kt` | `private fun label(parent: LinearLayout, value: String, size: Int=16, color: Int=Color.WHITE, bold: Boolean=false): TextView = text(value,size,color,bold).also` | 101 |
-| `ui/MainActivity.kt` | `private fun button(value: String, primary: Boolean = false, action: () -> Unit): Button = Button(this).apply` | 102 |
-| `ui/MainActivity.kt` | `private fun input(hintText: String, value: String=""): EditText = EditText(this).apply` | 108 |
-| `ui/MainActivity.kt` | `private fun card(parent: LinearLayout): LinearLayout = col().apply` | 113 |
-| `ui/MainActivity.kt` | `private fun render()` | 117 |
-| `ui/MainActivity.kt` | `private fun explore()` | 147 |
-| `ui/MainActivity.kt` | `override fun beforeTextChanged(s: CharSequence?,start: Int,count: Int,after: Int)` | 171 |
-| `ui/MainActivity.kt` | `override fun onTextChanged(s: CharSequence?,start: Int,before: Int,count: Int)` | 172 |
-| `ui/MainActivity.kt` | `override fun afterTextChanged(s: Editable?)` | 173 |
-| `ui/MainActivity.kt` | `private fun renderResults()` | 176 |
-| `ui/MainActivity.kt` | `private fun poster(e: Event, height: Int=158): View` | 184 |
-| `ui/MainActivity.kt` | `private fun eventCard(parent: LinearLayout,e: Event)` | 193 |
-| `ui/MainActivity.kt` | `private fun openEvent(id: Long)` | 208 |
-| `ui/MainActivity.kt` | `private fun details(e: Event)` | 212 |
-| `ui/MainActivity.kt` | `override fun beforeTextChanged(s: CharSequence?,start: Int,count: Int,after: Int)` | 234 |
-| `ui/MainActivity.kt` | `override fun onTextChanged(s: CharSequence?,start: Int,before: Int,count: Int)` | 235 |
-| `ui/MainActivity.kt` | `override fun afterTextChanged(s: Editable?)` | 236 |
-| `ui/MainActivity.kt` | `private fun mapScreen()` | 248 |
-| `ui/MainActivity.kt` | `private fun ticketsScreen()` | 275 |
-| `ui/MainActivity.kt` | `private fun profileScreen()` | 308 |
-| `ui/MainActivity.kt` | `private fun qrBitmap(payload: String): Bitmap` | 328 |
-| `ui/MainActivity.kt` | `private fun safeOpen(uri: String)` | 335 |
-| `ui/MainActivity.kt` | `private fun toast(s: String)` | 339 |
-| `ui/MainActivity.kt` | `private fun surprise()` | 340 |
-| `ui/MainActivity.kt` | `private fun syncSensor()` | 346 |
-| `ui/MainActivity.kt` | `override fun onResume()` | 352 |
-| `ui/MainActivity.kt` | `override fun onPause()` | 353 |
-| `ui/MainActivity.kt` | `override fun onDestroy()` | 354 |
-| `ui/MainActivity.kt` | `override fun onAccuracyChanged(sensor: Sensor?,accuracy: Int)` | 355 |
-| `ui/MainActivity.kt` | `override fun onSensorChanged(event: SensorEvent)` | 356 |
-| `viewmodel/BadgrViewModel.kt` | `private fun refresh() = viewModelScope.launch` | 30 |
-| `viewmodel/BadgrViewModel.kt` | `fun favorite(id: Long) = viewModelScope.launch` | 33 |
-| `viewmodel/BadgrViewModel.kt` | `fun reserve(id: Long, holder: String)` | 36 |
-| `viewmodel/BadgrViewModel.kt` | `fun checkIn(id: String) = viewModelScope.launch` | 48 |
-| `viewmodel/BadgrViewModel.kt` | `fun reset() = viewModelScope.launch` | 54 |
-| `viewmodel/BadgrViewModel.kt` | `fun visibleEvents(): List<Event> = EventSearch.filter(_catalog.value?.events.orEmpty(), query, category)` | 57 |
-| `viewmodel/BadgrViewModel.kt` | `fun discover(): Event? = _catalog.value?.events?.randomOrNull()` | 59 |
+| `domain/rules/Rules.kt` | `fun accept(x: Float, y: Float, z: Float, timeMs: Long): Boolean` | 34 |
+| `ui/MainActivity.kt` | `override fun onCreate(savedInstanceState: Bundle?)` | 61 |
+| `ui/MainActivity.kt` | `override fun handleOnBackPressed()` | 77 |
+| `ui/MainActivity.kt` | `override fun onSaveInstanceState(outState: Bundle)` | 84 |
+| `ui/MainActivity.kt` | `private fun dp(n: Int) = (n * resources.displayMetrics.density).toInt()` | 89 |
+| `ui/MainActivity.kt` | `private fun shape(color: Int, radius: Int = 20) = GradientDrawable().apply` | 90 |
+| `ui/MainActivity.kt` | `private fun gradient(a: Int = pink, b: Int = Color.rgb(144,90,234)) = GradientDrawable(GradientDrawable.Orientation.TL_BR, intArrayOf(a,b)).apply` | 91 |
+| `ui/MainActivity.kt` | `private fun col(): LinearLayout = LinearLayout(this).apply` | 92 |
+| `ui/MainActivity.kt` | `private fun row(): LinearLayout = LinearLayout(this).apply` | 93 |
+| `ui/MainActivity.kt` | `private fun text(value: String, size: Int = 16, color: Int = Color.WHITE, bold: Boolean = false): TextView = TextView(this).apply` | 94 |
+| `ui/MainActivity.kt` | `private fun gap(parent: LinearLayout, h: Int = 16)` | 98 |
+| `ui/MainActivity.kt` | `private fun label(parent: LinearLayout, value: String, size: Int=16, color: Int=Color.WHITE, bold: Boolean=false): TextView = text(value,size,color,bold).also` | 99 |
+| `ui/MainActivity.kt` | `private fun button(value: String, primary: Boolean = false, action: () -> Unit): Button = Button(this).apply` | 100 |
+| `ui/MainActivity.kt` | `private fun input(hintText: String, value: String=""): EditText = EditText(this).apply` | 106 |
+| `ui/MainActivity.kt` | `private fun card(parent: LinearLayout): LinearLayout = col().apply` | 111 |
+| `ui/MainActivity.kt` | `private fun render()` | 115 |
+| `ui/MainActivity.kt` | `private fun explore()` | 145 |
+| `ui/MainActivity.kt` | `override fun beforeTextChanged(s: CharSequence?,start: Int,count: Int,after: Int)` | 169 |
+| `ui/MainActivity.kt` | `override fun onTextChanged(s: CharSequence?,start: Int,before: Int,count: Int)` | 170 |
+| `ui/MainActivity.kt` | `override fun afterTextChanged(s: Editable?)` | 171 |
+| `ui/MainActivity.kt` | `private fun renderResults()` | 174 |
+| `ui/MainActivity.kt` | `private fun poster(e: Event, height: Int=158): View` | 182 |
+| `ui/MainActivity.kt` | `private fun eventCard(parent: LinearLayout,e: Event)` | 191 |
+| `ui/MainActivity.kt` | `private fun openEvent(id: Long)` | 206 |
+| `ui/MainActivity.kt` | `private fun details(e: Event)` | 210 |
+| `ui/MainActivity.kt` | `override fun beforeTextChanged(s: CharSequence?,start: Int,count: Int,after: Int)` | 232 |
+| `ui/MainActivity.kt` | `override fun onTextChanged(s: CharSequence?,start: Int,before: Int,count: Int)` | 233 |
+| `ui/MainActivity.kt` | `override fun afterTextChanged(s: Editable?)` | 234 |
+| `ui/MainActivity.kt` | `private fun mapScreen()` | 246 |
+| `ui/MainActivity.kt` | `private fun ticketsScreen()` | 273 |
+| `ui/MainActivity.kt` | `private fun profileScreen()` | 306 |
+| `ui/MainActivity.kt` | `private fun qrBitmap(payload: String): Bitmap` | 326 |
+| `ui/MainActivity.kt` | `private fun safeOpen(uri: String)` | 333 |
+| `ui/MainActivity.kt` | `private fun toast(s: String)` | 337 |
+| `ui/MainActivity.kt` | `private fun surprise()` | 338 |
+| `ui/MainActivity.kt` | `private fun syncSensor()` | 344 |
+| `ui/MainActivity.kt` | `override fun onResume()` | 350 |
+| `ui/MainActivity.kt` | `override fun onPause()` | 351 |
+| `ui/MainActivity.kt` | `override fun onDestroy()` | 352 |
+| `ui/MainActivity.kt` | `override fun onAccuracyChanged(sensor: Sensor?,accuracy: Int)` | 353 |
+| `ui/MainActivity.kt` | `override fun onSensorChanged(event: SensorEvent)` | 354 |
+| `viewmodel/BadgrViewModel.kt` | `private fun refresh() = viewModelScope.launch` | 28 |
+| `viewmodel/BadgrViewModel.kt` | `fun favorite(id: Long) = viewModelScope.launch` | 31 |
+| `viewmodel/BadgrViewModel.kt` | `fun reserve(id: Long, holder: String)` | 34 |
+| `viewmodel/BadgrViewModel.kt` | `fun checkIn(id: String) = viewModelScope.launch` | 46 |
+| `viewmodel/BadgrViewModel.kt` | `fun reset() = viewModelScope.launch` | 52 |
+| `viewmodel/BadgrViewModel.kt` | `fun visibleEvents(): List<Event> = EventSearch.filter(_catalog.value?.events.orEmpty(), query, category)` | 55 |
+| `viewmodel/BadgrViewModel.kt` | `fun discover(): Event? = _catalog.value?.events?.randomOrNull()` | 57 |
 
 ## DAO: o que é e como explicar
 
@@ -148,15 +146,14 @@ interface TicketDao {
 
 Entidade de banco não é a mesma coisa que modelo de domínio: as entidades têm anotações Room e ficam em data/local/entity. Os modelos sem anotações ficam em domain/model. EntityMappers converte entre os dois.
 
-## Banco e migração
+## Banco local
 
-BadgrDatabase é uma classe abstrata que herda RoomDatabase. @Database lista as entidades e define versão 2. Os getters abstratos retornam os DAOs. getInstance usa singleton com @Volatile e synchronized e mantém contexto da aplicação.
+BadgrDatabase é uma classe abstrata que herda RoomDatabase. @Database lista as entidades e define versão 1. Os getters abstratos retornam os DAOs. getInstance usa singleton com @Volatile e synchronized e mantém contexto da aplicação.
 
 Room.databaseBuilder indica classe do banco e nome do arquivo. Room continua usando SQLite local. Não existe Firebase neste projeto. O esquema exportado para app/schemas documenta as tabelas e pode apoiar futuras migrações.
 
-DatabaseMigrations.FROM_1_TO_2 preserva o banco da primeira versão, que usava SQLiteOpenHelper diretamente. A migração reconstrói as tabelas para os nomes e constraints esperados pelo Room, copiando registros. Não há fallbackToDestructiveMigration.
 
-**Onde o arquivo fica?** No armazenamento interno privado do app, normalmente em /data/user/0/br.com.badgr.mobile.demo/databases/badgr-demo.db. Em um emulador, abra App Inspection > Database Inspector com o app em execução e veja as tabelas.
+**Onde o arquivo fica?** No armazenamento interno privado do app, normalmente em /data/user/0/br.com.badgr.mobile.demo/databases/badgr.db. Em um emulador, abra App Inspection > Database Inspector com o app em execução e veja as tabelas.
 
 **Como comprovar:** favorite e reserve, encerre o app e abra de novo. Depois mostre as linhas em favorites e tickets no Database Inspector. Desinstalar ou limpar dados pode apagar esse banco.
 
@@ -193,9 +190,9 @@ Models.kt tem Event, Ticket e Catalog. Rules.kt contém:
 | EventSearch | Remove acentos e diferenciação de caixa e filtra categoria |
 | ShakeDetector | Magnitude dos três eixos em g e intervalo entre detecções |
 
-DomainTest.kt em app/src/test/java/br/com/badgr/mobile/ contém 22 testes: PricingTest (6), BookingRulesTest (6), ShakeDetectorTest (5) e EventSearchTest (5). Execute pela seta ao lado das classes ou com ./gradlew testDebugUnitTest.
+os arquivos de teste em domain/rules em app/src/test/java/br/com/badgr/mobile/ contém 22 testes: PricingTest (6), BookingRulesTest (6), ShakeDetectorTest (5) e EventSearchTest (5). Execute pela seta ao lado das classes ou com ./gradlew testDebugUnitTest.
 
-@Test identifica o caso. assertEquals compara resultado esperado e obtido. assertTrue/assertFalse verificam condições. assertNull confirma ausência de mensagem de validação.
+@Test identifica o caso. assertEquals compara resultado esperado e obtido. Todos os testes usam assertEquals para comparar esperado e obtido, incluindo mensagens, valores booleanos e listas.
 
 Exemplo: Pricing.total(3500) deve resultar em 3850. No sensor, gravidade de 9,80665 em um eixo deve resultar em false, pois o aparelho parado mede aproximadamente 1 g.
 
@@ -247,10 +244,21 @@ KAPT processa as anotações de Room. Adicionar @Dao e @Entity exige gerar códi
 
 **Room é DAO?** Room é a biblioteca. DAO é o componente de acesso, marcado com @Dao.
 
-**Repository grava direto com SQL?** Não. Chama os DAOs. SQL manual fora das anotações aparece somente na migração do esquema anterior.
+**Repository grava direto com SQL?** Não. Chama os DAOs. As consultas ficam declaradas nos DAOs com @Query.
 
 **Entity é ViewModel?** Não. Entity define uma tabela e seus campos. ViewModel mantém estado e ações da interface.
 
 **Tem sincronização remota?** Não. Banco, estoque e check-in são locais.
 
 **O que falta para produção?** APIs seguras, pagamento, autenticação, sincronização e validação de ingressos em servidor. Nada disso deve ser apresentado como implementado.
+
+## Localização dos testes unitários
+
+Em `app/src/test/java/br/com/badgr/mobile/domain/rules/`:
+
+- `PricingTest.kt`: 6 testes de taxa e total.
+- `BookingRulesTest.kt`: 6 testes de nome e capacidade.
+- `ShakeDetectorTest.kt`: 5 testes de aceleração e intervalo.
+- `EventSearchTest.kt`: 5 testes de busca.
+
+Cada caso tem `@Test` e usa `assertEquals(esperado, obtido)`. Exemplo: `assertEquals(3850L, Pricing.total(3500))`.

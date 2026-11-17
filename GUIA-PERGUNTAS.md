@@ -1,7 +1,7 @@
 # Perguntas rápidas — versão Room + DAO
 
 **Onde está a persistência?**
-Em `data/local/BadgrDatabase.kt`. Room abre o arquivo SQLite `badgr-demo.db`. As tabelas são as classes `@Entity`, e as operações são definidas nas interfaces `@Dao`.
+Em `data/local/BadgrDatabase.kt`. Room abre o arquivo SQLite `badgr.db`. As tabelas são as classes `@Entity`, e as operações são definidas nas interfaces `@Dao`.
 
 **O que é DAO?**
 Data Access Object: componente que define como acessar os dados. `EventDao`, `FavoriteDao` e `TicketDao` têm `@Query` e `@Insert`. Room gera as classes que executam essas operações.
@@ -29,9 +29,6 @@ Os DAOs têm funções `suspend`, e Room executa o trabalho nos próprios execut
 
 **Como garante estoque?**
 `database.withTransaction` engloba consulta do evento, contagem de ingressos, validação e inserção. A garantia vale para o banco local, sem estoque compartilhado entre aparelhos.
-
-**Como atualiza o banco antigo?**
-O banco agora tem versão 2. `DatabaseMigrations.FROM_1_TO_2` adapta a estrutura anterior e copia eventos, favoritos e ingressos. Não usa migração destrutiva.
 
 **Para que serve o singleton?**
 Para compartilhar uma instância do RoomDatabase no processo, com contexto da aplicação. Evita criar uma conexão independente para cada ação da tela.

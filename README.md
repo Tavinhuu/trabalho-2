@@ -21,21 +21,20 @@ Aplicativo Android nativo em Kotlin com **MVVM + Room + DAOs + Repository**, ace
 | `data/repository/` | Coordenação de DAOs e transações |
 | `data/local/dao/` | Interfaces `@Dao` com consultas, inserções, exclusões e check-in |
 | `data/local/entity/` | Classes `@Entity`, chaves primárias e estrangeiras |
-| `data/local/` | `@Database`, singleton Room, migração e agenda inicial |
+| `data/local/` | `@Database`, singleton Room e agenda inicial |
 | `data/mapper/` | Conversão entre entidades persistidas e modelos de domínio |
 
 Fluxo: a View chama o ViewModel, que chama o Repository. O Repository usa os DAOs. Room gera as implementações dos DAOs e persiste no SQLite.
 
 ## Onde está a persistência?
 
-Em `data/local/BadgrDatabase.kt`: `Room.databaseBuilder` abre o arquivo privado `badgr-demo.db`.
+Em `data/local/BadgrDatabase.kt`: `Room.databaseBuilder` abre o arquivo privado `badgr.db`.
 
 - `EventEntity`, `FavoriteEntity`, `TicketEntity`: definem as tabelas.
 - `EventDao`, `FavoriteDao`, `TicketDao`: definem o acesso aos dados.
 - `TicketDao.insert`: grava o ingresso.
 - `TicketDao.getAll`: recupera os ingressos ao reabrir.
 - `EventRepository.reserve`: valida estoque e insere dentro de `withTransaction`.
-- `DatabaseMigrations.FROM_1_TO_2`: adapta a versão anterior, preservando dados.
 
 Room é uma camada sobre SQLite, não um banco remoto. Funções `suspend` dos DAOs usam os executores do Room. Não usamos `allowMainThreadQueries`. `withTransaction` mantém o conjunto de operações atômico. O banco singleton usa contexto de Application.
 
@@ -54,7 +53,7 @@ Demonstre busca, favorito, reserva, QR, reabertura, mapa e leitura do acelerôme
 
 Windows: `gradlew.bat`. APK: `app/build/outputs/apk/debug/app-debug.apk`.
 
-Os 22 testes JUnit validam regras de preço, reserva, busca e movimento. O compilador Room valida as consultas dos DAOs. Isso não substitui testes de UI, banco real e hardware no emulador. Consulte [VALIDACAO.md](VALIDACAO.md).
+Os 22 testes JUnit usam assertEquals e validam regras de preço, reserva, busca e movimento. O compilador Room valida as consultas dos DAOs. Isso não substitui testes de UI, banco real e hardware no emulador. Consulte [VALIDACAO.md](VALIDACAO.md).
 
 Kotlin 2.0.21, Android Gradle Plugin 8.7.3, Gradle 8.9, Room 2.7.2 e KAPT. API mínima 26, compile SDK 35. Os esquemas Room exportados ficam em `app/schemas/` e devem ser versionados. Classes geradas pelo KAPT ficam em `app/build/` e não devem ser editadas.
 

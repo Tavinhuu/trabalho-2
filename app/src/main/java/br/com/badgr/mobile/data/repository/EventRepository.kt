@@ -11,8 +11,6 @@ import br.com.badgr.mobile.domain.model.Catalog
 import br.com.badgr.mobile.domain.rules.BookingRules
 import br.com.badgr.mobile.domain.rules.Pricing
 import java.util.UUID
-
-/** Regras e transações passam pelos DAOs. Room executa suas funções suspend fora da main thread. */
 class EventRepository(private val database: BadgrDatabase) {
     private val events = database.eventDao()
     private val favorites = database.favoriteDao()
