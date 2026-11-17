@@ -1,13 +1,17 @@
-plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
+plugins { id("com.android.application"); id("org.jetbrains.kotlin.android"); id("org.jetbrains.kotlin.kapt") }
 android {
     namespace = "br.com.badgr.mobile"
     compileSdk = 35
-    defaultConfig { applicationId = "br.com.badgr.mobile.demo"; minSdk = 26; targetSdk = 34; versionCode = 1; versionName = "1.0-demo" }
+    defaultConfig { applicationId = "br.com.badgr.mobile.demo"; minSdk = 26; targetSdk = 34; versionCode = 2; versionName = "2.0-room-demo" }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = "17" }
     testOptions { unitTests.isReturnDefaultValues = true }
 }
+kapt { arguments { arg("room.schemaLocation", "$projectDir/schemas") } }
 dependencies {
+    implementation("androidx.room:room-runtime:2.7.2")
+    implementation("androidx.room:room-ktx:2.7.2")
+    kapt("androidx.room:room-compiler:2.7.2")
     implementation("androidx.activity:activity-ktx:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")

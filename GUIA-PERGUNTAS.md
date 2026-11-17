@@ -1,57 +1,55 @@
-# Preparação para as perguntas do professor
+# Perguntas rápidas — versão Room + DAO
 
-Leia o código antes de apresentar. Cada integrante precisa entender o caminho entre botão, ViewModel, Repository e SQLite.
+**Onde está a persistência?**
+Em `data/local/BadgrDatabase.kt`. Room abre o arquivo SQLite `badgr-demo.db`. As tabelas são as classes `@Entity`, e as operações são definidas nas interfaces `@Dao`.
 
-**O que é MVVM aqui?**
-A View é a MainActivity. O BadgrViewModel expõe o catálogo em LiveData e recebe as ações. EventRepository e BadgrDatabase gerenciam o armazenamento. Domain.kt tem entidades e regras.
+**O que é DAO?**
+Data Access Object: componente que define como acessar os dados. `EventDao`, `FavoriteDao` e `TicketDao` têm `@Query` e `@Insert`. Room gera as classes que executam essas operações.
 
-**Por que usar ViewModel?**
-Para separar estado e ações da interface e manter os dados durante rotação. Ele não deve guardar referências à Activity ou às Views.
+**O que é Entity?**
+Uma classe Kotlin marcada com `@Entity` que representa uma tabela. `@PrimaryKey` identifica a chave primária, `@ColumnInfo` mapeia nomes de colunas e `@ForeignKey` define relações.
 
-**Como a interface recebe os dados?**
-A Activity observa `vm.catalog`. Quando o ViewModel publica um novo Catalog, a interface renderiza esse estado. LiveData respeita o ciclo de vida do observador.
+**Onde grava ingresso?**
+`EventRepository.reserve` valida e chama `TicketDao.insert`. A inserção é persistida pelo Room. A Activity não contém SQL.
+
+**Qual a diferença entre Room e SQLite?**
+SQLite é o banco local. Room é a biblioteca de persistência que organiza entidades, DAOs e banco e verifica as consultas durante a compilação.
+
+**Qual a diferença entre Repository e DAO?**
+DAO define operações de persistência. Repository coordena essas operações com regras de negócio, como validar capacidade e gravar uma reserva na mesma transação.
+
+**Onde está o MVVM?**
+`ui/MainActivity` é View, `viewmodel/BadgrViewModel` é ViewModel, e o Model inclui domínio e camada de dados. A View observa LiveData.
+
+**O ViewModel é persistência?**
+Não. Ele mantém estado em memória durante mudanças de configuração. O banco em disco mantém os dados após encerrar o processo.
 
 **Como evita travar a tela?**
-O Repository usa `withContext(Dispatchers.IO)` para consultas e gravações. `viewModelScope.launch` coordena o trabalho e atualiza LiveData na thread principal.
-
-**Por que SQLite em vez de Firebase?**
-O requisito pede banco, sem impor serviço remoto. SQLite mantém o projeto independente de credenciais e permite demonstrar persistência offline. O banco fica no armazenamento privado do app.
+Os DAOs têm funções `suspend`, e Room executa o trabalho nos próprios executores. O ViewModel usa `viewModelScope`. `suspend` sozinho não cria uma thread.
 
 **Como garante estoque?**
-`reserve` inicia transação, consulta capacidade e quantidade reservada, valida e insere antes de confirmar a transação. Isso vale para o banco deste aparelho. Estoque global exigiria servidor e operação atômica no backend.
+`database.withTransaction` engloba consulta do evento, contagem de ingressos, validação e inserção. A garantia vale para o banco local, sem estoque compartilhado entre aparelhos.
 
-**Como calcula a taxa?**
-Em centavos inteiros. Evento gratuito tem taxa zero. Para os pagos, usa 10%, arredonda e aplica o mínimo de 150 centavos. R$ 35,00 mais R$ 3,50 dá R$ 38,50.
+**Como atualiza o banco antigo?**
+O banco agora tem versão 2. `DatabaseMigrations.FROM_1_TO_2` adapta a estrutura anterior e copia eventos, favoritos e ingressos. Não usa migração destrutiva.
 
-**Qual sensor foi usado?**
-O acelerômetro, obtido com `getDefaultSensor(TYPE_ACCELEROMETER)`. O Android envia três componentes em m/s². O código calcula a magnitude em unidades de g.
+**Para que serve o singleton?**
+Para compartilhar uma instância do RoomDatabase no processo, com contexto da aplicação. Evita criar uma conexão independente para cada ação da tela.
 
-**Por que o celular parado mede aproximadamente 1 g?**
-O acelerômetro inclui a gravidade. A magnitude do vetor parado é aproximadamente 9,80665 m/s², que equivale a 1 g.
+**Qual sensor?**
+Acelerômetro. `onSensorChanged` recebe os eixos; `ShakeDetector` calcula a magnitude. Repouso é aproximadamente 1 g. O limiar é 2,5 g com intervalo de 1,8 segundo.
 
-**Como evita várias sugestões seguidas?**
-O detector exige magnitude de pelo menos 2,5 g e intervalo mínimo de 1.800 ms. A View também evita abrir várias caixas de sugestão simultaneamente.
-
-**Por que remover o listener?**
-Para interromper trabalho e consumo desnecessário. O registro acontece apenas na tela Explorar, com a Activity retomada. `onPause` cancela a inscrição.
+**Como economiza sensor?**
+Registra apenas em Explorar, com a Activity retomada e sem detalhes abertos. Remove o listener em `onPause`.
 
 **O mapa usa GPS?**
-Não. Usa coordenadas de referência dos eventos no banco. O requisito de mapa é atendido com MapView, marcadores e interação. GPS seria um recurso adicional.
+Não. Os marcadores usam as coordenadas dos eventos no banco. MapView usa OpenStreetMap/osmdroid, e novos tiles precisam de internet.
 
-**Por que não existe uma chave do Google Maps?**
-A implementação usa OpenStreetMap/osmdroid. O carregamento dos tiles precisa de rede e os créditos precisam permanecer visíveis.
+**O QR comprova pagamento?**
+Não. Contém `BADGR-DEMO:` e UUID. É apenas uma demonstração. O check-in é manual e local, sem câmera.
 
-**O QR Code é real?**
-A imagem é um QR Code válido, gerado com ZXing, contendo `BADGR-DEMO:` e um UUID. Serve apenas à demonstração. Não comprova pagamento nem autentica ingresso na Badgr comercial.
+**Quais testes?**
+22 testes JUnit de preço, nome/capacidade, busca e detecção de movimento. São testes de regras, não de hardware ou UI. Room também verifica as consultas na compilação.
 
-**Quais testes são unitários?**
-PricingTest, BookingRulesTest, ShakeDetectorTest e EventSearchTest. Validam regras isoladas com JUnit 4, sem depender de interface ou de aparelho.
-
-**Por que testar sensor com números?**
-Para validar deterministicamente o algoritmo de detecção. A leitura física continua precisando de demonstração no aparelho ou emulador com controles de sensores.
-
-**Como impede repetir check-in?**
-O UPDATE tem condição `checked_in=0`. Depois da primeira atualização, outra chamada retorna zero linhas alteradas. A interface também deixa de exibir o botão de check-in.
-
-**O que falta para virar o aplicativo oficial?**
-Autenticação e APIs seguras, sincronização, pagamento real, estoque no servidor, validação de ingressos autenticada, testes instrumentados e publicação. Esses serviços não fazem parte desta demonstração.
+**Onde fica o layout XML?**
+A interface é criada com Views nativas em Kotlin na MainActivity. `styles.xml` define o tema, e não o layout das telas.

@@ -1,17 +1,21 @@
-# Validação da entrega
+# Validação — Room + DAO
 
-Data: 17/11/2026.
+Data: 17/11/2026. App 2.0-room-demo, versionCode 2.
 
-- Compilação Android: `assembleDebug`, concluída com sucesso.
-- Testes: `testDebugUnitTest`, 22 executados, zero falhas, erros ou ignorados.
-- JUnit: PricingTest (6), BookingRulesTest (6), ShakeDetectorTest (5) e EventSearchTest (5).
-- APK de desenvolvimento assinado e assinatura verificada com apksigner. Android mínimo 8.0/API 26.
-- Slides PPTX: 6 páginas com notas de apresentação, exportação e validação estrutural concluídas.
+- `assembleDebug`: compilação concluída com sucesso.
+- `testDebugUnitTest`: 22 testes, zero falhas ou erros.
+- Room 2.7.2/KAPT gerou EventDao_Impl, FavoriteDao_Impl, TicketDao_Impl e BadgrDatabase_Impl. Consultas dos DAOs verificadas na compilação.
+- Esquema Room versão 2 exportado em app/schemas/.
+- Migração 1 para 2 exercitada com SQLite em memória no host: dados de evento, favorito e ingresso preservados, chaves estrangeiras sem violações e colunas/FKs comparadas com o esquema gerado pelo Room. Isso não é teste instrumentado Android.
 
-## Verificação ainda necessária no aparelho
+## Limites da verificação
 
-A interface, os tiles do mapa e a leitura física do sensor não foram executados em aparelho ou emulador neste ambiente. Abra o APK e confira: busca, favorito, reserva, reabertura, QR Code, check-in, mapa com internet e movimento na aba Explorar. Os testes unitários validam as regras, sem comprovar integração de hardware.
+A interface, o mapa, o acelerômetro e a abertura/migração pelo Room no Android não foram executados em um emulador neste ambiente. Conferir no emulador antes de apresentar. Os testes JUnit são de regras de negócio. A conferência no host não substitui teste instrumentado de persistência Android.
 
-## Limites
+## Execução
 
-Agenda fictícia. Reserva e estoque apenas locais. Sem pagamento, login remoto ou validade dos QR Codes em eventos reais. O mapa exige rede para tiles novos. Acelerômetro depende do hardware. Não é um aplicativo conectado à produção da Badgr.
+No Android Studio: Git > Pull, Gradle Sync, selecionar o emulador e Run. Se abrir pela primeira vez, clone o repositório e abra sua raiz.
+
+## Limites funcionais
+
+Agenda fictícia, reserva e estoque locais, sem pagamento ou sincronização. QR de demonstração. Check-in manual, sem câmera. Mapa usa rede para tiles novos.

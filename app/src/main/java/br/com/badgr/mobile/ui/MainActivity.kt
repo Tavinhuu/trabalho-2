@@ -1,4 +1,11 @@
-package br.com.badgr.mobile
+package br.com.badgr.mobile.ui
+
+import br.com.badgr.mobile.viewmodel.BadgrViewModel
+import br.com.badgr.mobile.domain.model.Event
+import br.com.badgr.mobile.domain.rules.BookingRules
+import br.com.badgr.mobile.domain.rules.Pricing
+import br.com.badgr.mobile.domain.rules.ShakeDetector
+
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -311,7 +318,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         label(sensor,"Na aba Explorar, agite o celular para receber uma sugestão. O botão Me surpreenda funciona como alternativa manual.",14,muted)
         val tech=card(body)
         label(tech,"Por dentro do aplicativo",20,Color.WHITE,true);gap(tech,10)
-        label(tech,"Kotlin nativo\nMVVM com ViewModel e LiveData\nSQLite com transações e chaves estrangeiras\nOpenStreetMap com osmdroid\nSensorManager e acelerômetro\nTestes JUnit das regras de negócio",14,muted)
+        label(tech,"Kotlin nativo\nMVVM com ViewModel e LiveData\nRoom + SQLite com entidades e DAOs\nOpenStreetMap com osmdroid\nSensorManager e acelerômetro\nTestes JUnit das regras de negócio",14,muted)
         body.addView(button("Limpar favoritos e reservas") {
             AlertDialog.Builder(this).setTitle("Reiniciar demonstração?").setMessage("Apaga apenas os favoritos e ingressos deste aplicativo. A agenda continua disponível.")
                 .setNegativeButton("Cancelar",null).setPositiveButton("Limpar") { _,_ -> vm.reset() }.show()

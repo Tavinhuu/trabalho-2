@@ -1,5 +1,8 @@
 package br.com.badgr.mobile
 
+import br.com.badgr.mobile.domain.model.Event
+import br.com.badgr.mobile.domain.rules.*
+
 import org.junit.Assert.*
 import org.junit.Test
 

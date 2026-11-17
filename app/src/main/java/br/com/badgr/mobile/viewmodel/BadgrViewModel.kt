@@ -1,4 +1,11 @@
-package br.com.badgr.mobile
+package br.com.badgr.mobile.viewmodel
+
+import br.com.badgr.mobile.data.local.BadgrDatabase
+import br.com.badgr.mobile.data.repository.EventRepository
+import br.com.badgr.mobile.domain.model.Catalog
+import br.com.badgr.mobile.domain.model.Event
+import br.com.badgr.mobile.domain.rules.EventSearch
+
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -9,7 +16,7 @@ import kotlinx.coroutines.launch
 
 /** Estado da tela e ações ficam fora da Activity. Não guarda referências a Views. */
 class BadgrViewModel(app: Application) : AndroidViewModel(app) {
-    private val repository = EventRepository(BadgrDatabase(app))
+    private val repository = EventRepository(BadgrDatabase.getInstance(app))
     private val _catalog = MutableLiveData(Catalog())
     val catalog: LiveData<Catalog> = _catalog
     val error = MutableLiveData<String?>()
@@ -50,5 +57,4 @@ class BadgrViewModel(app: Application) : AndroidViewModel(app) {
     fun visibleEvents(): List<Event> = EventSearch.filter(_catalog.value?.events.orEmpty(), query, category)
         .filter { !onlyFavorites || it.id in _catalog.value!!.favorites }
     fun discover(): Event? = _catalog.value?.events?.randomOrNull()
-    override fun onCleared() { repository.close() }
 }

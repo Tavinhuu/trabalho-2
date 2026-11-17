@@ -1,93 +1,72 @@
-# Badgr Mobile — N2 de Desenvolvimento Mobile II
+# Badgr Mobile — Trabalho 2
 
-Aplicativo Android nativo em Kotlin inspirado na Badgr. Agenda fictícia, dados locais e nenhuma integração com o ambiente real. Não cobra pagamentos. QR Codes não valem em eventos reais.
+Aplicativo Android nativo em Kotlin com **MVVM + Room + DAOs + Repository**, acelerômetro, mapa e testes unitários. Agenda fictícia e reservas locais, sem pagamentos ou integração com a Badgr em produção.
 
-## Instalar o APK que acompanha a entrega
+## Rodar no Android Studio com emulador
 
-No Android, abra `Badgr-Mobile.apk` e instale. Se o sistema pedir, autorize a instalação pelo aplicativo usado para abrir o arquivo. Requer Android 8.0 ou superior. Para recompilar ou estudar o código, siga as etapas abaixo.
+1. Clone `https://github.com/Tavinhuu/trabalho-2.git` ou atualize com **Git > Pull** se já clonou.
+2. Abra a raiz `trabalho-2`, que contém `settings.gradle.kts`. Aguarde **Gradle Sync**. Instale SDK 35 quando solicitado. Use JDK 17 ou 21.
+3. Abra **Tools > Device Manager > Create Virtual Device**, escolha um Pixel e uma imagem Android 14/API 34. Baixe a imagem se necessário.
+4. Inicie o emulador, selecione a configuração **app** e clique em **Run**.
+5. Após atualizar este projeto, aceite o Gradle Sync: foram adicionadas dependências Room e o plugin KAPT.
 
-## Abrir e executar
+## Estrutura
 
-1. Extraia o projeto e abra a pasta `badgr-mobile` no Android Studio.
-2. Use o JDK embarcado no Android Studio (17 ou 21). Instale o SDK Android 35 quando solicitado.
-3. Aguarde a sincronização do Gradle. A primeira compilação precisa de internet.
-4. Selecione um Android 8.0/API 26 ou superior e clique em Run.
-5. Para testar o movimento, prefira um celular físico com acelerômetro. No emulador, use os controles de sensores.
+| Pasta em `app/src/main/java/br/com/badgr/mobile/` | Responsabilidade |
+|---|---|
+| `ui/` | Activity, Views nativas e integração com sensor/mapa |
+| `viewmodel/` | Estado observável LiveData e ações da tela |
+| `domain/model/` | Modelos Event, Ticket e Catalog |
+| `domain/rules/` | Preços, validação, busca e detecção de movimento |
+| `data/repository/` | Coordenação de DAOs e transações |
+| `data/local/dao/` | Interfaces `@Dao` com consultas, inserções, exclusões e check-in |
+| `data/local/entity/` | Classes `@Entity`, chaves primárias e estrangeiras |
+| `data/local/` | `@Database`, singleton Room, migração e agenda inicial |
+| `data/mapper/` | Conversão entre entidades persistidas e modelos de domínio |
 
-Comandos no terminal do projeto:
+Fluxo: a View chama o ViewModel, que chama o Repository. O Repository usa os DAOs. Room gera as implementações dos DAOs e persiste no SQLite.
+
+## Onde está a persistência?
+
+Em `data/local/BadgrDatabase.kt`: `Room.databaseBuilder` abre o arquivo privado `badgr-demo.db`.
+
+- `EventEntity`, `FavoriteEntity`, `TicketEntity`: definem as tabelas.
+- `EventDao`, `FavoriteDao`, `TicketDao`: definem o acesso aos dados.
+- `TicketDao.insert`: grava o ingresso.
+- `TicketDao.getAll`: recupera os ingressos ao reabrir.
+- `EventRepository.reserve`: valida estoque e insere dentro de `withTransaction`.
+- `DatabaseMigrations.FROM_1_TO_2`: adapta a versão anterior, preservando dados.
+
+Room é uma camada sobre SQLite, não um banco remoto. Funções `suspend` dos DAOs usam os executores do Room. Não usamos `allowMainThreadQueries`. `withTransaction` mantém o conjunto de operações atômico. O banco singleton usa contexto de Application.
+
+## Apresentação e perguntas
+
+Leia [ROTEIRO-APRESENTACAO-CODIGO.md](ROTEIRO-APRESENTACAO-CODIGO.md) e [GUIA-PERGUNTAS.md](GUIA-PERGUNTAS.md). O roteiro descreve cada arquivo e os métodos principais.
+
+Demonstre busca, favorito, reserva, QR, reabertura, mapa e leitura do acelerômetro. O mapa usa OpenStreetMap/osmdroid e precisa de rede para tiles novos. Na aba Explorar, movimento de pelo menos 2,5 g sugere um evento. O botão “Me surpreenda” é alternativa manual, não leitura de sensor. No emulador, use controles de sensores; rotação lenta pode não superar o limiar.
+
+## Testes e compilação
 
 ```sh
 ./gradlew testDebugUnitTest
 ./gradlew assembleDebug
 ```
 
-No Windows use `gradlew.bat`. APK gerado: `app/build/outputs/apk/debug/app-debug.apk`.
+Windows: `gradlew.bat`. APK: `app/build/outputs/apk/debug/app-debug.apk`.
 
-## Roteiro do código
+Os 22 testes JUnit validam regras de preço, reserva, busca e movimento. O compilador Room valida as consultas dos DAOs. Isso não substitui testes de UI, banco real e hardware no emulador. Consulte [VALIDACAO.md](VALIDACAO.md).
 
-Leia [ROTEIRO-APRESENTACAO-CODIGO.md](ROTEIRO-APRESENTACAO-CODIGO.md) para localizar cada arquivo, estudar o fluxo da reserva e responder às perguntas sobre persistência, MVVM, sensor, mapas e testes.
+Kotlin 2.0.21, Android Gradle Plugin 8.7.3, Gradle 8.9, Room 2.7.2 e KAPT. API mínima 26, compile SDK 35. Os esquemas Room exportados ficam em `app/schemas/` e devem ser versionados. Classes geradas pelo KAPT ficam em `app/build/` e não devem ser editadas.
 
-## O que demonstrar em 5 minutos
+## Limites
 
-1. Abra Explorar. Mostre busca por `umbra`, filtros e favorito.
-2. Abra o evento, confira ingresso, taxa e total. Informe um nome e reserve.
-3. Em Ingressos, mostre QR Code, compartilhamento e simulação de check-in.
-4. Feche e reabra o aplicativo. Mostre a reserva e o favorito persistidos.
-5. Abra Mapa. Toque em um marcador para abrir o evento. Use internet para os tiles.
-6. Volte a Explorar e agite o aparelho. A leitura em g fica visível. Mostre o evento sugerido.
-7. Explique MVVM e abra os testes.
-
-## Requisitos e código
-
-| Requisito do PDF | Implementação | Arquivo |
-|---|---|---|
-| Android/Kotlin | App nativo, API mínima 26 | `MainActivity.kt`, `app/build.gradle.kts` |
-| MVVM | View observa LiveData e envia ações ao ViewModel | `MainActivity.kt`, `BadgrViewModel.kt` |
-| Banco | SQLite, 3 tabelas, FK, índice e transações | `BadgrDatabase.kt`, `EventRepository.kt` |
-| Sensor | Acelerômetro pelo SensorManager, sugestão por movimento | `MainActivity.kt`, `ShakeDetector` em `Domain.kt` |
-| Mapas | MapView osmdroid e marcadores OpenStreetMap | `mapScreen` em `MainActivity.kt` |
-| Testes unitários | JUnit 4, regras sem dependência de Activity | `DomainTest.kt` |
-| Fonte completo | Projeto Gradle e wrapper | esta pasta |
-| Apresentação | Slides com notas de fala | arquivo PPTX que acompanha o projeto |
-
-## Arquitetura
-
-- **View:** `MainActivity` cria Views nativas, observa estado e trata o ciclo de vida. Não executa SQL.
-- **ViewModel:** `BadgrViewModel` concentra as ações, estado, carregamento e tratamento de erros. Sobrevive à rotação e não mantém referências a Views.
-- **Model:** modelos e regras em `Domain.kt`, repositório em `EventRepository.kt` e banco em `BadgrDatabase.kt`.
-- Consultas e escritas usam `Dispatchers.IO`. O resultado volta para a thread principal pelo `viewModelScope`.
-- `busy` impede duplo clique durante reserva. Uma transação verifica disponibilidade e insere o ingresso de forma atômica no banco local.
-- O ViewModel retém a navegação em rotações. `onSaveInstanceState` preserva tela e filtros após recriação pelo Android. Rascunhos de nome usam preferências locais.
-
-## Banco
-
-`events` guarda a agenda fictícia pré-carregada na criação. `favorites` usa `event_id` como chave primária para evitar duplicatas. `tickets` guarda UUID, evento, titular, total em centavos, timestamp e status de check-in. Chaves estrangeiras ficam habilitadas. O índice em `tickets.event_id` atende a contagem por evento.
-
-O check-in atualiza apenas registros com `checked_in=0`. Esta é uma simulação manual local, não uma leitura de câmera nem uma validação de ingressos reais. A reserva reduz a disponibilidade pela contagem de tickets do evento. O estoque não é compartilhado entre aparelhos.
-
-## Sensor
-
-A magnitude é `sqrt(x²+y²+z²)/9,80665`. O limiar de 2,5 g distingue o movimento forte do repouso, que mede aproximadamente 1 g. Há intervalo mínimo de 1.800 ms entre detecções. O sensor registra somente na aba Explorar, sem um detalhe aberto, e é removido em `onPause`. O Android pode não oferecer acelerômetro: o aplicativo informa isso e mantém uma sugestão manual. O botão manual não comprova o requisito físico de sensor.
-
-## Mapas
-
-OpenStreetMap via osmdroid, sem chave nem cadastro. Coordenadas fictícias de referência em São Paulo. Os marcadores abrem os eventos e há abertura opcional de rota em aplicativo externo. Não usa GPS nem solicita permissão de localização. Tiles novos precisam de internet. Os créditos do OpenStreetMap ficam visíveis.
-
-## Regras e testes
-
-Valores monetários em centavos (`Long`), taxa demonstrativa de 10% com mínimo R$ 1,50 em ingressos pagos e zero em gratuitos. Arredondamento para o centavo mais próximo. `Math.addExact` detecta overflow ao somar. `BookingRules` valida nome e capacidade. `EventSearch` normaliza acentos e caixa. `ShakeDetector` é puro e testável com leituras numéricas.
-
-Os testes unitários não substituem verificação física de sensor, renderização da UI ou testes instrumentados do banco.
-
-## Limites da versão acadêmica
-
-Sem login remoto, Firebase, Mercado Pago, carteira financeira, painel de produção ou sincronização. Não é um porte completo do produto comercial. É um app independente com um fluxo completo de demonstração para os requisitos do trabalho. A versão de desenvolvimento do APK não é uma publicação na Play Store.
+Reservas e estoque apenas neste aparelho. QR de demonstração sem validade em eventos reais. Check-in por botão, sem scanner de câmera. Sem GPS, autenticação remota, cobrança ou sincronização com Firebase. SharedPreferences guarda apenas o rascunho do nome digitado.
 
 ## Referências
 
-- SensorManager: https://developer.android.com/reference/kotlin/android/hardware/SensorManager
+- Room: https://developer.android.com/training/data-storage/room
+- DAOs: https://developer.android.com/training/data-storage/room/accessing-data
 - ViewModel: https://developer.android.com/topic/libraries/architecture/viewmodel
-- SQLiteOpenHelper: https://developer.android.com/reference/android/database/sqlite/SQLiteOpenHelper
+- SensorManager: https://developer.android.com/reference/kotlin/android/hardware/SensorManager
 - osmdroid: https://github.com/osmdroid/osmdroid
 - OpenStreetMap: https://www.openstreetmap.org/copyright
-- ZXing: https://github.com/zxing/zxing
